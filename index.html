@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAIZEN UI ENGINE</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #0c0d12;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        /* Top Navigation Menu to swap games seamlessly */
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            background-color: #161822;
+            padding: 6px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 440px;
+            border: 1px solid #232634;
+        }
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #798299;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background-color: #242736;
+            color: #ffffff;
+        }
+        .game-container {
+            background-color: #11131c;
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 440px;
+            border: 1px solid #1d212f;
+            display: none;
+        }
+        .game-container.active { display: block; }
+        
+        /* Premium Live Telemetry Tracking Data Badges */
+        .game-header { font-size: 20px; font-weight: bold; margin-bottom: 12px; }
+        .telemetry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+        .badge {
+            background-color: #171924;
+            border: 1px solid #222635;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 13px;
+            color: #929bb3;
+        }
+        .badge span { color: #ffffff; font-weight: bold; display: block; margin-top: 2px; }
+
+        /* 5x5 Mines Matrix Functional Board Grid */
+        .grid-5x5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 16px; }
+        .mine-tile {
+            background-color: #1e2230;
+            border: none;
+            border-radius: 8px;
+            aspect-ratio: 1;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            color: #ffffff;
+            transition: background-color 0.15s, transform 0.1s;
+        }
+        .mine-tile:hover { background-color: #272c3e; }
+        .mine-tile.safe { background-color: #106b3e; color: #2ecc71; }
+        .mine-tile.hit { background-color: #7a2222; color: #e74c3c; }
+        /* Blackjack Board Section Asset Layouts */
+        .bj-section { background-color: #171924; border-radius: 12px; padding: 15px; margin-bottom: 16px; border: 1px solid #222635; }
+        .bj-label { font-size: 12px; color: #798299; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bj-score { font-weight: bold; color: #ffffff; margin-bottom: 8px; }
+        .card-row { display: flex; gap: 6px; min-height: 70px; margin-bottom: 12px; }
+        
+        /* Physical White Playing Card Graphic Mod Models */
+        .card-model {
+            background-color: #ffffff;
+            color: #000000;
+            width: 50px;
+            height: 72px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            animation: dealIn 0.25s ease-out;
+        }
+        .card-model.red-suit { color: #d32f2f; }
+        
+        /* OwO Style Coinflip Physics Element Modules */
+        .cf-arena { display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
+        .coin-element {
+            width: 90px;
+            height: 90px;
+            background: radial-gradient(circle, #f39c12, #d35400);
+            border-radius: 50%;
+            border: 4px solid #f1c40f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: transform 0.5s ease-in-out;
+        }
+        .coin-element.spinning { animation: coinRotate 0.15s linear infinite; }
+
+        /* OwO Style Rapid Spinning Mechanical Reels Window */
+        .slots-window {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            background-color: #171924;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #222635;
+        }
+        .reel-frame {
+            background-color: #0f1017;
+            width: 70px;
+            height: 70px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            border: 1px solid #2a2e40;
+        }
+        .reel-frame.spinning { animation: slotScroll 0.1s linear infinite; }
+
+        /* Premium Flat-Green Gameplay Control Buttons */
+        .action-btn {
+            background-color: #106b3e;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            width: 100%;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: filter 0.15s;
+        }
+        .action-btn:hover { filter: brightness(1.1); }
+        .btn-row { display: flex; gap: 8px; }
+        .hit-btn { background-color: #2980b9; }
+        .stand-btn { background-color: #c0392b; }
+
+        /* Fluid Animation Frame Key-Sequencing Matrix rules */
+        @keyframes dealIn { 0% { transform: translateY(-20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        @keyframes coinRotate { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+        @keyframes slotScroll { 0% { transform: translateY(-5px); } 100% { transform: translateY(5px); } }
+    </style>
+</head>
+<body>
+
+    <!-- APPLICATION TAB CONTROL BAR -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchGame('mines-tab')">💣 Mines</button>
+        <button class="tab-btn" onclick="switchGame('bj-tab')">🃏 Blackjack</button>
+        <button class="tab-btn" onclick="switchGame('cf-tab')">🪙 Coinflip</button>
+        <button class="tab-btn" onclick="switchGame('slots-tab')">🎰 Slots</button>
+    </div>
+
+    <!-- SCREEN CONTAINER MODULE: 5x5 PREMIUM MINES ENGINE -->
+    <div id="mines-tab" class="game-container active">
+        <div class="game-header">mines</div>
+        <div class="telemetry-grid">
+            <div class="badge">bet <span id="m-bet">$3m</span></div>
+            <div class="badge">mult <span id="m-mult">0.00x</span></div>
+            <div class="badge">moved <span id="m-moved">0/23</span></div>
+            <div class="badge">next click <span id="m-next">$4.14m</span></div>
+        </div>
+        <div class="grid-5x5" id="mines-board"></div>
+        <button class="action-btn" onclick="cashoutMines()">Cashed Out Winnings</button>
+    </div>
+
+    <!-- SCREEN CONTAINER MODULE: GRAPHICAL VECTOR BLACKJACK TABLE -->
+    <div id="bj-tab" class="game-container">
+        <div class="game-header">blackjack</div>
+        <div class="telemetry-grid"><div class="badge" style="grid-column: span 2">bet <span>$1m</span></div></div>
+        <div class="bj-section">
+            <div class="bj-label">dealer · <span id="d-score">?</span></div>
+            <div class="card-row" id="dealer-cards"></div>
+            <div class="bj-label">you · <span id="p-score">0</span></div>
+            <div class="card-row" id="player-cards"></div>
+        </div>
+        <div class="btn-row">
+            <button class="action-btn hit-btn" onclick="hitBJ()">Hit</button>
+            <button class="action-btn stand-btn" onclick="standBJ()">Stand</button>
+        </div>
+    </div>
+
+    <!-- SCREEN CONTAINER MODULE: OWO STREAMLINED COINFLIP ARENA -->
+    <div id="cf-tab" class="game-container">
+        <div class="game-header">coinflip</div>
+        <div class="cf-arena">
+            <div class="coin-element" id="coin-asset">H</div>
+            <div class="btn-row" style="width:100%">
+                <button class="action-btn" style="background-color:#d35400" onclick="playCF('Heads')">Bet Heads</button>
+                <button class="action-btn" style="background-color:#2c3e50" onclick="playCF('Tails')">Bet Tails</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN CONTAINER MODULE: OWO RAPID ROLLING SLOT MACHINE -->
+    <div id="slots-tab" class="game-container">
+        <div class="game-header">slots</div>
+        <div class="slots-window">
+            <div class="reel-frame" id="slot1">🍒</div>
+            <div class="reel-frame" id="slot2">🍒</div>
+            <div class="reel-frame" id="slot3">🍒</div>
+        </div>
+        <button class="action-btn" style="background-color:#9b59b6" onclick="spinSlots()">Pull Lever</button>
+    </div>
+    <script>
+        // Interactive Tab Switching Navigation Engine
+        function switchGame(tabId) {
+            document.querySelectorAll('.game-container').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+            if(tabId === 'bj-tab') resetBJ();
+        }
+
+        // --- 💣 5x5 MINES INTERACTIVE GAME LOGIC (Green S & Red X) ---
+        const board = document.getElementById('mines-board');
+        let diamonds = 0, mBet = 3000000, minesCount = 3, gameOver = false;
+        let minePositions = Array(25).fill(false).map((_,i) => i < minesCount);
+        minePositions.sort(() => Math.random() - 0.5);
+
+        for (let i = 0; i < 25; i++) {
+            const tile = document.createElement('button');
+            tile.className = 'mine-tile';
+            tile.innerText = ' ';
+            tile.onclick = () => {
+                if(gameOver) return;
+                if(minePositions[i]) {
+                    tile.className = 'mine-tile hit'; tile.innerText = 'X'; gameOver = true; alert('💥 Mine Exploded!');
+                } else {
+                    tile.className = 'mine-tile safe'; tile.innerText = 'S'; diamonds++;
+                    let mult = (1 + (diamonds * 0.35)).toFixed(2);
+                    document.getElementById('m-mult').innerText = mult + 'x';
+                    document.getElementById('m-moved').innerText = `${diamonds}/23`;
+                    document.getElementById('m-next').innerText = '\$' + ((mBet * mult * 1.2)/1000000).toFixed(2) + 'm';
+                }
+            };
+            board.appendChild(tile);
+        }
+        function cashoutMines() { alert('🏆 Cashed out safely!'); gameOver = true; }
+
+        // --- 🃏 VEGAS BLACKJACK MODEL LOGIC PACKS ---
+        const suits = ['♠️','♥️','♦️','♣️'], ranks = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+        let pHand = [], dHand = [];
+        
+        function createCard() {
+            let r = ranks[Math.floor(Math.random()*ranks.length)], s = suits[Math.floor(Math.random()*suits.length)];
+            let div = document.createElement('div'); div.className = `card-model ${(s==='♥️'||s==='♦️')?'red-suit':''}`;
+            div.innerHTML = `<div>${r}</div><div style="text-align:right">${s}</div>`;
+            let val = isNaN(r) ? (r === 'A' ? 11 : 10) : parseInt(r);
+            return { el: div, val: val };
+        }
+        function resetBJ() {
+            pHand = [createCard(), createCard()]; dHand = [createCard(), createCard()];
+            document.getElementById('player-cards').innerHTML = ''; document.getElementById('dealer-cards').innerHTML = '';
+            pHand.forEach(c => document.getElementById('player-cards').appendChild(c.el));
+            document.getElementById('dealer-cards').appendChild(dHand.el);
+            let hidden = document.createElement('div'); hidden.className = 'card-model'; hidden.style.background = '#2c3e50';
+            document.getElementById('dealer-cards').appendChild(hidden);
+            document.getElementById('p-score').innerText = pHand.reduce((a,b)=>a+b.val,0);
+            document.getElementById('d-score').innerText = dHand[0].val;
+        }
+        function hitBJ() {
+            let c = createCard(); pHand.push(c); document.getElementById('player-cards').appendChild(c.el);
+            let score = pHand.reduce((a,b)=>a+b.val,0); document.getElementById('p-score').innerText = score;
+            if(score > 21) alert('💥 Bust! Dealer wins.');
+        }
+        function standBJ() {
+            document.getElementById('dealer-cards').innerHTML = ''; dHand.forEach(c => document.getElementById('dealer-cards').appendChild(c.el));
+            document.getElementById('d-score').innerText = dHand.reduce((a,b)=>a+b.val,0); alert('Hand complete!');
+        }
+
+        // --- 🪙 HIGH-SPEED COINFLIP LOGIC FRAME ASSETS ---
+        function playCF(guess) {
+            let coin = document.getElementById('coin-asset'); coin.classList.add('spinning');
+            setTimeout(() => {
+                coin.classList.remove('spinning'); let res = Math.random() > 0.5 ? 'Heads' : 'Tails';
+                coin.innerText = res === 'Heads' ? 'H' : 'T'; alert(res === guess ? '🎉 You Won!' : '📉 You Lost!');
+            }, 800);
+        }
+
+        // --- 🎰 RAPID REEL LOCK SLOTS ASSETS ---
+        function spinSlots() {
+            let items = ['🍒','👑','💎','7️⃣','🍊'];
+            document.getElementById('slot1').classList.add('spinning'); document.getElementById('slot2').classList.add('spinning'); document.getElementById('slot3').classList.add('spinning');
+            setTimeout(() => {
+                document.getElementById('slot1').classList.remove('spinning'); document.getElementById('slot2').classList.remove('spinning'); document.getElementById('slot3').classList.remove('spinning');
+                let s1 = items[Math.floor(Math.random()*items.length)], s2 = items[Math.floor(Math.random()*items.length)], s3 = items[Math.floor(Math.random()*items.length)];
+                document.getElementById('slot1').innerText = s1; document.getElementById('slot2').innerText = s2; document.getElementById('slot3').innerText = s3;
+            }, 600);
+        }
+    </script>
+</body>
+</html>
